@@ -44,9 +44,7 @@ bookmarksRouter
         .send('Rating must be a number');
     }
 
-    const id = uuid();
-    
-    bookmarks.push(bookmark)
+    bookmarks.push({id: uuid(), title, url, desc, rating: String(rating) })
 
     res
       .status(201)
