@@ -52,10 +52,11 @@ bookmarksRouter
     }
 
     bookmarks.push({id: uuid(), title, url, desc, rating: String(rating) })
-
+    logger.info(`Bookmark with ID: ${id} created`);
     res
       .status(201)
-      .send('POST request processed')
+      .location(`http://host:8000/card/${id}`)
+      .json(bookmarks)
   })
 
 bookmarksRouter
