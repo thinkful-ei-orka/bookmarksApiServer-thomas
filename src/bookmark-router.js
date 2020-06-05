@@ -16,33 +16,41 @@ bookmarksRouter
     if (!title) {
       return res
         .status(400)
-        .send('Title is required')
+        .send('Title is required');
     }
     if (!url) {
       return res
         .status(400)
-        .send('URL is required')
+        .send('URL is required');
     }
     if (!desc) {
       return res
         .status(400)
-        .send('A description is required')
+        .send('A description is required');
     }
     if (!rating) {
       return res
         .status(400)
-        .send('A rating is required')
+        .send('A rating is required');
     }
     if (url.length < 5 && !url.startsWith('http')) {
       return res
         .status(400)
-        .send('URL must be in proper format')
+        .send('URL must be in proper format');
     }
     if (Number(rating) === 'NaN' || Number(rating) > 5 || Number(rating) < 1) {
       return res
         .status(400)
-        .send('Rating must be a number')
+        .send('Rating must be a number');
     }
+
+    const id = uuid();
+    
+    bookmarks.push(bookmark)
+
+    res
+      .status(201)
+      .send('POST request processed')
   })
 
 bookmarksRouter
