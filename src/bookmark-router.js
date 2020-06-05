@@ -50,12 +50,12 @@ bookmarksRouter
         .status(400)
         .send('Rating must be a number between 1 and 5');
     }
-
-    bookmarks.push({id: uuid(), title, url, desc, rating: String(rating) })
-    logger.info(`Bookmark with ID: ${id} created`);
+    const newId = uuid()
+    bookmarks.push({id: newId, title, url, desc, rating: String(rating) })
+    logger.info(`Bookmark with ID: ${newId} created`);
     res
       .status(201)
-      .location(`http://host:8000/card/${id}`)
+      .location(`http://host:8000/bookmarks/${newId}`)
       .json(bookmarks)
   })
 
@@ -95,8 +95,11 @@ bookmarksRouter
         .send('ID does match any entries');
     }
     bookmarks.splice(index, 1);
+
+    logger.info(`Card with id ${id} deleted.`);
     res
-      .send('Deleted');
+      .status(204)
+      .end();
   })
 
   module.exports = bookmarksRouter
