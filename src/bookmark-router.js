@@ -53,13 +53,29 @@ bookmarksRouter
 
 bookmarksRouter
   .route('/:id')
+  .get((req, res) => {
+    const { id } = req.params;
+    const bookmark = bookmarks.find(bookmark => bookmark.id == id)
+    if (!id) {
+      return res
+        .status(404)
+        .send('Bookmark not found');
+    }
+    if (!bookmark) {
+      return res
+        .status(404)
+        .send('Bookmark not found');
+    }
+    res
+      .json(bookmark);
+  })
   .delete((req, res) => {
     const { id } = req.params;
     const index = bookmarks.indexOf(bookmark => bookmark.id == id);
     if (!id) {
       return res
         .status(400)
-        .send('Please provide a valid id');
+        .send('Please provide a valid ID');
     }
     if (!index) {
       return res
