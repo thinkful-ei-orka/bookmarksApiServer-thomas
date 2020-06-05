@@ -6,4 +6,4 @@ bookmarks = [{
   rating: 5
 }]
 
-module.exports = bookmarks
+module.exports = { bookmarks }
