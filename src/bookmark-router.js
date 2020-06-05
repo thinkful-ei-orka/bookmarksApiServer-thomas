@@ -70,3 +70,5 @@ bookmarksRouter
     res
       .send('Deleted');
   })
+
+  module.exports = bookmarksRouter
