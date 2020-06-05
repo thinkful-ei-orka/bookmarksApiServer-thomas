@@ -82,11 +82,13 @@ bookmarksRouter
     const { id } = req.params;
     const index = bookmarks.indexOf(bookmark => bookmark.id == id);
     if (!id) {
+      logger.error('No ID found: ID is required to DELETE a single bookmark');
       return res
         .status(400)
         .send('Please provide a valid ID');
     }
     if (!index) {
+      logger.error(`No bookmark found: ${id} does not match any bookmark`);
       return res
         .status(400)
         .send('ID does match any entries');
