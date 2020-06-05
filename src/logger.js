@@ -14,3 +14,5 @@ if (NODE_ENV !== 'production') {
     format: winston.format.simple()
   }));
 }
+
+module.exports = logger
