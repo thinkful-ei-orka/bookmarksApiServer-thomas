@@ -53,4 +53,20 @@ bookmarksRouter
 
 bookmarksRouter
   .route('/:id')
-  .delete((req, res) => {})
+  .delete((req, res) => {
+    const { id } = req.params;
+    const index = bookmarks.indexOf(bookmark => bookmark.id == id);
+    if (!id) {
+      return res
+        .status(400)
+        .send('Please provide a valid id');
+    }
+    if (!index) {
+      return res
+        .status(400)
+        .send('ID does match any entries');
+    }
+    bookmarks.splice(index, 1);
+    res
+      .send('Deleted');
+  })
