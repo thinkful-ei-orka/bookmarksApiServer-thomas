@@ -2,16 +2,21 @@ const express = require('express')
 const { v4: uuid } = require('uuid')
 
 const bookmarksRouter = express.Router()
-const { bookmarks } = require('./store')
+//const { bookmarks } = require('./store')
 const bodyParser = express.json()
 const logger = require('./logger')
+const BookmarksService = require('./bookmarks-service')
 
 bookmarksRouter
   .route('/')
   .get((req, res) => {
-    return res
-      .json(bookmarks)
+    const knexInstance = req.app.get('db')
+    return BookmarksService.getAllBookmarks(knexInstance)
+      .then(bookmarks => {
+        res.json(bookmarks)
+      })
   })
+
   .post(bodyParser, (req, res) => {
     const { title, url, desc, rating } = req.body
     if (!title) {
@@ -63,22 +68,26 @@ bookmarksRouter
   .route('/:id')
   .get((req, res) => {
     const { id } = req.params;
-    const bookmark = bookmarks.find(bookmark => bookmark.id == id)
     if (!id) {
       logger.error('No ID found: ID is required to look up single bookmark');
       return res
         .status(404)
         .send('Bookmark not found');
     }
+    const knexInstance = req.app.get('db')
+    return BookmarksService.getById(knexInstance, id)
+    .then(bookmark => {
+
     if (!bookmark) {
       logger.error(`No bookmark found: ${id} does not match any bookmark`);
       return res
         .status(404)
         .send('Bookmark not found');
     }
-    res
-      .json(bookmark);
+      res.json(bookmark)
+    })
   })
+  
   .delete((req, res) => {
     const { id } = req.params;
     const index = bookmarks.indexOf(bookmark => bookmark.id == id);
