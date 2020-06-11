@@ -3,4 +3,5 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   API_TOKEN: process.env.API_TOKEN,
   DB_URL: process.env.DB_URL,
+  TEST_DB_URL: process.env.TEST_DB_URL,
 }
