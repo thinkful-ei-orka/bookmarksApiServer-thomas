@@ -19,20 +19,24 @@ bookmarksRouter
   })
 
   .post(bodyParser, (req, res) => {
-    const { title, url, desc, rating } = req.body
+    const { title, url, description, rating } = req.body
     if (!title) {
       logger.error('No title found: Title is required');
       return res
         .status(400)
-        .send('Title is required');
+        .json({
+          error: { message: 'Title is required' }
+        });
     }
     if (!url) {
       logger.error('No URL found: URL is required');
       return res
         .status(400)
-        .send('URL is required');
+        .json({
+          error: { message: 'url is required' }
+        });
     }
-    if (!desc) {
+    if (!description) {
       logger.error('No description found: Description is required');
       return res
         .status(400)
@@ -57,20 +61,21 @@ bookmarksRouter
         .send('Rating must be a number between 1 and 5');
     }
 
-    const newBookmark = { 
+    const newBookmark = {
       title: xss(title),
       url: xss(url),
-      desc: xss(desc),
-      rating };
+      description: xss(description),
+      rating
+    };
 
     const knexInstance = req.app.get('db');
     return BookmarksService.insertNewBookmark(knexInstance, newBookmark)
       .then(bookmark => {
-        logger.info(`Bookmark with ID: ${newId} created`);
+        logger.info(`Bookmark with ID: ${bookmark.id} created`);
         res
           .status(201)
-          .location(`http://host:8000/bookmarks/${newId}`)
-          .json(bookmarks)
+          .location(`http://host:8000/bookmarks/${bookmark.id}`)
+          .json(bookmark)
       })
   })
 
@@ -121,6 +126,23 @@ bookmarksRouter
           .status(204)
           .end();
       })
+  })
+
+  .patch(bodyParser, (req, res, next) => {
+    const { title, url, desc, rating } = req.body;
+    const updatedBookmark = {
+      title: xss(title),
+      url: xss(url),
+      desc: xss(desc),
+      rating
+    }
+
+    const db = req.app.get('db');
+    BookmarksService.updateBookmark(db, req.param.bookmark_id, updatedBookmark)
+      .then(update => {
+        res.status(204).end()
+      })
+      .catch(next)
   })
 
 module.exports = bookmarksRouter

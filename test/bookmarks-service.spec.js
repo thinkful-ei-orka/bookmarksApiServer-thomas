@@ -4,7 +4,7 @@ const knex = require('knex')
 const { TEST_DB_URL, API_TOKEN } = require('../src/config')
 const app = require('../src/app')
 
-describe('Bookmarks Service Object', function() {
+describe('Bookmarks Service Object', function () {
   let db
 
   before('setup db', () => {
@@ -28,7 +28,7 @@ describe('Bookmarks Service Object', function() {
         "url": "http://www.thebestest.com",
         "description": "The Best Site Ever",
         "rating": 5
-      }, 
+      },
       {
         "id": 2,
         "title": "NOT Best Bookmark",
@@ -38,7 +38,7 @@ describe('Bookmarks Service Object', function() {
       }
     ]
     context('when bookmarks has data', () => {
-      
+
       beforeEach('instert bookmarks', () => {
         return db('bookmark_table').insert(bookmarksTest)
       })
@@ -59,10 +59,52 @@ describe('Bookmarks Service Object', function() {
           .expect(200, expectedBookmark)
       })
 
+      it(`should delete a bookmark by id`, () => {
+
+      })
+
+
     })
 
-    context('when bookmarks has no data', () => {
 
+  })
+
+  context('when bookmarks has no data', () => {
+    describe(`POST /bookmark`, () => {
+      it(`creates a bookmark, responding with 201 and the new bookmark`, () => {
+        const newBookmark = {
+          title: 'bookmark',
+          url: 'http://www.google.com',
+          description: 'google is a bookmark',
+          rating: '4'
+        }
+        return supertest(app)
+          .post('/bookmarks')
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .send(newBookmark)
+          .expect(201)
+          .expect(res => {
+            expect(res.body.title).to.eql(newBookmark.title)
+            expect(res.body.url).to.eql(newBookmark.url)
+            expect(res.body.description).to.eql(newBookmark.description)
+            expect(res.body).to.have.property('id')
+          })
+      })
+
+      it(`responds with a 400 and an error message the 'title' is not inputted`, () => {
+        const newBookmark = {
+          url: 'http://www.google.com',
+          description: 'google is a bookmark',
+          rating: '4'
+        }
+        return supertest(app)
+          .post('/bookmarks')
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .send(newBookmark)
+          .expect(400, {
+            error: { message: 'Title is required' }
+          })
+      })
     })
   })
 })
