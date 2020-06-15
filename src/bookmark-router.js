@@ -1,4 +1,5 @@
 const express = require('express')
+const xss = require('xss');
 const { v4: uuid } = require('uuid')
 
 const bookmarksRouter = express.Router()
@@ -55,13 +56,22 @@ bookmarksRouter
         .status(400)
         .send('Rating must be a number between 1 and 5');
     }
-    const newId = uuid()
-    bookmarks.push({id: newId, title, url, desc, rating: String(rating) })
-    logger.info(`Bookmark with ID: ${newId} created`);
-    res
-      .status(201)
-      .location(`http://host:8000/bookmarks/${newId}`)
-      .json(bookmarks)
+
+    const newBookmark = { 
+      title: xss(title),
+      url: xss(url),
+      desc: xss(desc),
+      rating };
+
+    const knexInstance = req.app.get('db');
+    return BookmarksService.insertNewBookmark(knexInstance, newBookmark)
+      .then(bookmark => {
+        logger.info(`Bookmark with ID: ${newId} created`);
+        res
+          .status(201)
+          .location(`http://host:8000/bookmarks/${newId}`)
+          .json(bookmarks)
+      })
   })
 
 bookmarksRouter
@@ -76,39 +86,41 @@ bookmarksRouter
     }
     const knexInstance = req.app.get('db')
     return BookmarksService.getById(knexInstance, id)
-    .then(bookmark => {
+      .then(bookmark => {
 
-    if (!bookmark) {
-      logger.error(`No bookmark found: ${id} does not match any bookmark`);
-      return res
-        .status(404)
-        .send('Bookmark not found');
-    }
-      res.json(bookmark)
-    })
+        if (!bookmark) {
+          logger.error(`No bookmark found: ${id} does not match any bookmark`);
+          return res
+            .status(404)
+            .send('Bookmark not found');
+        }
+        res.json(bookmark)
+      })
   })
-  
+
   .delete((req, res) => {
     const { id } = req.params;
-    const index = bookmarks.indexOf(bookmark => bookmark.id == id);
     if (!id) {
       logger.error('No ID found: ID is required to DELETE a single bookmark');
       return res
         .status(400)
         .send('Please provide a valid ID');
     }
-    if (!index) {
-      logger.error(`No bookmark found: ${id} does not match any bookmark`);
-      return res
-        .status(400)
-        .send('ID does match any entries');
-    }
-    bookmarks.splice(index, 1);
 
-    logger.info(`Card with id ${id} deleted.`);
-    res
-      .status(204)
-      .end();
+    const knexInstance = req.app.get('db');
+    return BookmarksService.deleteShoppingItem(knexInstance, id)
+      .them(bookmark => {
+        if (!bookmark) {
+          logger.error(`No bookmark found: ${id} does not match any bookmark`);
+          return res
+            .status(400)
+            .send('ID does match any entries');
+        }
+        logger.info(`Card with id ${id} deleted.`);
+        res
+          .status(204)
+          .end();
+      })
   })
 
-  module.exports = bookmarksRouter
+module.exports = bookmarksRouter
