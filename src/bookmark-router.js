@@ -37,31 +37,13 @@ bookmarksRouter
       }
     }
 
-    if (!url) {
-      logger.error('No URL found: URL is required');
-      return res
-        .status(400)
-        .json({
-          error: { message: 'url is required' }
-        });
-    }
-    if (!description) {
-      logger.error('No description found: Description is required');
-      return res
-        .status(400)
-        .send('A description is required');
-    }
-    if (!rating) {
-      logger.error('No rating found: Rating is required');
-      return res
-        .status(400)
-        .send('A rating is required');
-    }
-    if (url.length < 5 && !url.startsWith('http')) {
+    if (url.length < 5 || !url.startsWith('http')) {
       logger.error('URL incorrect: URL must start with "http"');
       return res
         .status(400)
-        .send('URL must be in proper format');
+        .json({
+          error: { message: `URL must be in proper format` }
+        })
     }
     if (Number(rating) === 'NaN' || Number(rating) > 5 || Number(rating) < 1) {
       logger.error('Rating incorrect: Rating must be a number between 1 and 5');
@@ -107,21 +89,26 @@ bookmarksRouter
 
   .delete((req, res) => {
     const { id } = req.params;
+    console.log(id)
     if (!id) {
       logger.error('No ID found: ID is required to DELETE a single bookmark');
       return res
         .status(400)
-        .send('Please provide a valid ID');
+        .json({
+          error: { message: `ID is required` }
+        })
     }
 
     const knexInstance = req.app.get('db');
-    return BookmarksService.deleteShoppingItem(knexInstance, id)
-      .them(bookmark => {
+    return BookmarksService.deleteBookmark(knexInstance, id)
+      .then(bookmark => {
         if (!bookmark) {
           logger.error(`No bookmark found: ${id} does not match any bookmark`);
           return res
-            .status(400)
-            .send('ID does match any entries');
+            .status(404)
+            .json({
+              error: { message: `ID does not exist` }
+            })
         }
         logger.info(`Card with id ${id} deleted.`);
         res

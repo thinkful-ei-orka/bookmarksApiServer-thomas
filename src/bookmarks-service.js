@@ -21,7 +21,7 @@ const BookmarksService = {
       })
   },
 
-  deleteShoppingItem(knex, id) {
+  deleteBookmark(knex, id) {
     return knex('bookmark_table')
       .where({id})
       .delete()

@@ -15,28 +15,30 @@ describe('Bookmarks Service Object', function () {
     app.set('db', db)
   })
 
+  const bookmarksTest = [
+    {
+      "id": 1,
+      "title": "Best Bookmark",
+      "url": "http://www.thebestest.com",
+      "description": "The Best Site Ever",
+      "rating": 5
+    },
+    {
+      "id": 2,
+      "title": "NOT Best Bookmark",
+      "url": "http://www.notthebestest.com",
+      "description": "NOT The Best Site Ever",
+      "rating": 1
+    }
+  ]
+
   const cleanBookmarks = () => db('bookmark_table').truncate();
   before('clean bookmarks', cleanBookmarks);
   afterEach('clean bookmarks', cleanBookmarks);
   after('drop connection', () => db.destroy())
 
   describe('GET bookmarks', () => {
-    const bookmarksTest = [
-      {
-        "id": 1,
-        "title": "Best Bookmark",
-        "url": "http://www.thebestest.com",
-        "description": "The Best Site Ever",
-        "rating": 5
-      },
-      {
-        "id": 2,
-        "title": "NOT Best Bookmark",
-        "url": "http://www.notthebestest.com",
-        "description": "NOT The Best Site Ever",
-        "rating": 1
-      }
-    ]
+
     context('when bookmarks has data', () => {
 
       beforeEach('instert bookmarks', () => {
@@ -58,15 +60,45 @@ describe('Bookmarks Service Object', function () {
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .expect(200, expectedBookmark)
       })
-
-      it(`should delete a bookmark by id`, () => {
-
-      })
-
-
     })
 
 
+  })
+
+  describe.only(`DELETE /bookmarks`, () => {
+    context(`Given there are bookmarks in the database`, () => {
+
+      beforeEach('insert bookmarks', () => {
+        return db
+          .into('bookmark_table')
+          .insert(bookmarksTest)
+      })
+
+      it('Responds with 204 and removes the bookmark', () => {
+        const idToRemove = 1;
+        const expectedBookmarks = bookmarksTest.filter(bookmark => bookmark.id != idToRemove)
+        return supertest(app)
+          .delete(`/bookmarks/${idToRemove}`)
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .expect(204)
+          .then(res => {
+            supertest(app)
+             .get('/bookmarks')
+             .set('Authorization', `Bearer ${API_TOKEN}`)
+             .expect(expectedBookmarks)
+          })
+      })
+
+      it('Repsonds with a 404 when the bookmark Id does not exist', () => {
+        const idToRemove = 4;
+        return supertest(app)
+          .delete(`/bookmarks/${idToRemove}`)
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .expect(404, {
+            error: { message: 'ID does not exist'}
+          })
+      })
+    })
   })
 
   context('when bookmarks has no data', () => {
@@ -99,7 +131,7 @@ describe('Bookmarks Service Object', function () {
           rating: '4'
         }
         return supertest(app)
-          .post('/booksmarks')
+          .post('/bookmarks')
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .send(newBookmark)
           .expect(400, {
