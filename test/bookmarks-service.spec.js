@@ -47,7 +47,7 @@ describe('Bookmarks Service Object', function () {
 
       it('should return 200 with all bookmarks', () => {
         return supertest(app)
-          .get('/bookmarks')
+          .get('/api/bookmarks')
           .set('Authorization', 'Bearer ' + API_TOKEN)
           .expect(200, bookmarksTest);
       })
@@ -56,7 +56,7 @@ describe('Bookmarks Service Object', function () {
         const bookmarkId = 2
         const expectedBookmark = bookmarksTest[bookmarkId - 1]
         return supertest(app)
-          .get(`/bookmarks/${bookmarkId}`)
+          .get(`/api/bookmarks/${bookmarkId}`)
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .expect(200, expectedBookmark)
       })
@@ -65,7 +65,7 @@ describe('Bookmarks Service Object', function () {
 
   })
 
-  describe.only(`DELETE /bookmarks`, () => {
+  describe(`DELETE /api/bookmarks`, () => {
     context(`Given there are bookmarks in the database`, () => {
 
       beforeEach('insert bookmarks', () => {
@@ -78,12 +78,12 @@ describe('Bookmarks Service Object', function () {
         const idToRemove = 1;
         const expectedBookmarks = bookmarksTest.filter(bookmark => bookmark.id != idToRemove)
         return supertest(app)
-          .delete(`/bookmarks/${idToRemove}`)
+          .delete(`/api/bookmarks/${idToRemove}`)
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .expect(204)
           .then(res => {
             supertest(app)
-             .get('/bookmarks')
+             .get('/api/bookmarks')
              .set('Authorization', `Bearer ${API_TOKEN}`)
              .expect(expectedBookmarks)
           })
@@ -92,7 +92,7 @@ describe('Bookmarks Service Object', function () {
       it('Repsonds with a 404 when the bookmark Id does not exist', () => {
         const idToRemove = 4;
         return supertest(app)
-          .delete(`/bookmarks/${idToRemove}`)
+          .delete(`/api/bookmarks/${idToRemove}`)
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .expect(404, {
             error: { message: 'ID does not exist'}
@@ -111,7 +111,7 @@ describe('Bookmarks Service Object', function () {
           rating: '4'
         }
         return supertest(app)
-          .post('/bookmarks')
+          .post('/api/bookmarks')
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .send(newBookmark)
           .expect(201)
@@ -131,7 +131,7 @@ describe('Bookmarks Service Object', function () {
           rating: '4'
         }
         return supertest(app)
-          .post('/bookmarks')
+          .post('/api/bookmarks')
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .send(newBookmark)
           .expect(400, {
@@ -153,7 +153,7 @@ describe('Bookmarks Service Object', function () {
           delete newBookmarkTwo[field]
 
           return supertest(app)
-            .post('/bookmarks')
+            .post('/api/bookmarks')
             .set('Authorization', `Bearer ${API_TOKEN}`)
             .send(newBookmarkTwo)
             .expect(400, {
