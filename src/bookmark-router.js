@@ -18,16 +18,25 @@ bookmarksRouter
       })
   })
 
-  .post(bodyParser, (req, res) => {
+  .post(bodyParser, (req, res, next) => {
     const { title, url, description, rating } = req.body
-    if (!title) {
-      logger.error('No title found: Title is required');
-      return res
-        .status(400)
-        .json({
-          error: { message: 'Title is required' }
-        });
+    const newBookmark = {
+      title: xss(title),
+      url: xss(url),
+      description: xss(description),
+      rating
+    };
+
+    for (const [key, value] of Object.entries(newBookmark)) {
+      if (!value) {
+        return res
+          .status(400)
+          .json({
+            error: { message: `${key} is required` }
+          });
+      }
     }
+
     if (!url) {
       logger.error('No URL found: URL is required');
       return res
@@ -60,13 +69,6 @@ bookmarksRouter
         .status(400)
         .send('Rating must be a number between 1 and 5');
     }
-
-    const newBookmark = {
-      title: xss(title),
-      url: xss(url),
-      description: xss(description),
-      rating
-    };
 
     const knexInstance = req.app.get('db');
     return BookmarksService.insertNewBookmark(knexInstance, newBookmark)

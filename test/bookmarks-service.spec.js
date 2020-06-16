@@ -91,19 +91,43 @@ describe('Bookmarks Service Object', function () {
           })
       })
 
-      it(`responds with a 400 and an error message the 'title' is not inputted`, () => {
+      it(`responds with a 400 when an inccorect URL is put in`, () => {
         const newBookmark = {
-          url: 'http://www.google.com',
+          title: 'bookmark',
+          url: 'htp://www.google.com',
           description: 'google is a bookmark',
           rating: '4'
         }
         return supertest(app)
-          .post('/bookmarks')
+          .post('/booksmarks')
           .set('Authorization', `Bearer ${API_TOKEN}`)
           .send(newBookmark)
           .expect(400, {
-            error: { message: 'Title is required' }
+            error: { message: `URL must be in proper format` }
           })
+      })
+
+      const requiredFields = ['title', 'url', 'description', 'rating']
+
+      requiredFields.forEach(field => {
+        const newBookmarkTwo = {
+          title: 'Google',
+          url: 'http://www.google.com',
+          description: 'google is a bookmark',
+          rating: '4'
+        }
+
+        it(`responds with a 400 and an error message the ${field} is not inputted`, () => {
+          delete newBookmarkTwo[field]
+
+          return supertest(app)
+            .post('/bookmarks')
+            .set('Authorization', `Bearer ${API_TOKEN}`)
+            .send(newBookmarkTwo)
+            .expect(400, {
+              error: { message: `${field} is required` }
+            })
+        })
       })
     })
   })
